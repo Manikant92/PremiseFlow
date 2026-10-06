@@ -36,7 +36,6 @@ Cortex Agents · Streamlit in Snowflake. Built and tested with
 ```
 premiseflow/
   README.md                  full product overview  <- start here
-  DEMO_GUIDE.md              3-5 minute presentation script
   ARCHITECTURE.md            how it fits together
   DATA_MODEL.md              tables, synthetic data, the seeded break
   ASSUMPTION_METHODOLOGY.md  assumption contracts, detection, governance

@@ -30,3 +30,6 @@ Thumbs.db
 # Scratch
 *.log
 premiseflow/sql/_*.sql
+
+# Presentation material - kept local only
+premiseflow/DEMO_GUIDE.md
