@@ -1,0 +1,135 @@
+-- PremiseFlow :: 02_raw_tables.sql
+-- Synthetic source-system landing zone. No real PII; every row is generated.
+
+USE DATABASE PREMISEFLOW;
+
+-- ---------------------------------------------------------------------------
+-- Generation configuration. Single source of truth for the demo timeline so
+-- the whole dataset (and the seeded structural break) is reproducible.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS RAW.RAW_GEN_CONFIG (
+  CONFIG_KEY    STRING NOT NULL,
+  CONFIG_VALUE  STRING NOT NULL,
+  DESCRIPTION   STRING,
+  UPDATED_AT    TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Ground truth about the injected behaviour change. Used by the regression
+-- suite to prove the Reality Challenger actually found what we planted.
+CREATE TABLE IF NOT EXISTS RAW.RAW_GROUND_TRUTH (
+  GROUND_TRUTH_ID   STRING NOT NULL,
+  ASSUMPTION_ID     STRING,
+  PHENOMENON        STRING,
+  BREAK_START_DATE  DATE,
+  DESCRIPTION       STRING,
+  EXPECTED_PRE_VALUE   FLOAT,
+  EXPECTED_POST_VALUE  FLOAT,
+  MASKING_MECHANISM STRING,
+  CREATED_AT        TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_CUSTOMERS (
+  CUSTOMER_ID             STRING NOT NULL,
+  CUSTOMER_SEGMENT        STRING,
+  TENURE_MONTHS           NUMBER(6,0),
+  PAYROLL_CUSTOMER_FLAG   BOOLEAN,
+  ACQUISITION_CHANNEL     STRING,
+  JOIN_DATE               DATE,
+  RISK_SEGMENT            STRING,
+  COHORT                  STRING,          -- INCUMBENT | PROMOTIONAL_NEW
+  HOME_REGION_CODE        STRING,
+  LOADED_AT               TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_ACCOUNTS (
+  ACCOUNT_ID          STRING NOT NULL,
+  CUSTOMER_ID         STRING NOT NULL,
+  PRODUCT_TYPE        STRING,
+  OPEN_DATE           DATE,
+  CURRENT_BALANCE     NUMBER(18,2),
+  OPENING_BALANCE     NUMBER(18,2),
+  INTEREST_RATE       FLOAT,
+  PROMOTIONAL_FLAG    BOOLEAN,
+  CURRENCY_CODE       STRING,
+  STATUS              STRING,
+  LOADED_AT           TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_DAILY_BALANCES (
+  ACCOUNT_ID       STRING NOT NULL,
+  CUSTOMER_ID      STRING NOT NULL,
+  BALANCE_DATE     DATE   NOT NULL,
+  CLOSING_BALANCE  NUMBER(18,2),
+  PRODUCT_TYPE     STRING,
+  COHORT           STRING,
+  PROMOTIONAL_FLAG BOOLEAN,
+  PAYROLL_CUSTOMER_FLAG BOOLEAN
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_TRANSACTIONS (
+  TRANSACTION_ID    STRING NOT NULL,
+  ACCOUNT_ID        STRING NOT NULL,
+  CUSTOMER_ID       STRING NOT NULL,
+  TXN_DATE          DATE,
+  TXN_TYPE          STRING,   -- deposit|withdrawal|transfer|interest_credit|salary_credit|promotional_deposit
+  AMOUNT            NUMBER(18,2),
+  DIRECTION         STRING,   -- CREDIT | DEBIT
+  COUNTERPARTY_TYPE STRING,
+  CHANNEL           STRING
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_MARKET_RATES (
+  RATE_DATE            DATE NOT NULL,
+  POLICY_RATE_PCT      FLOAT,
+  INTERBANK_3M_PCT     FLOAT,
+  PEER_DEPOSIT_RATE_PCT FLOAT,
+  OWN_DEPOSIT_RATE_PCT FLOAT,
+  DEPOSIT_BETA         FLOAT
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_ALM_RESULTS (
+  RESULT_ID              STRING NOT NULL,
+  AS_OF_DATE             DATE,
+  MEASURE_CODE           STRING,
+  MEASURE_VALUE          FLOAT,
+  UNIT                   STRING,
+  ASSUMPTION_SET_REF     STRING,
+  NOTES                  STRING
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_MODEL_RESULTS (
+  RUN_ID            STRING NOT NULL,
+  MODEL_ID          STRING,
+  AS_OF_DATE        DATE,
+  OUTPUT_NAME       STRING,
+  OUTPUT_VALUE      FLOAT,
+  UNIT              STRING,
+  ASSUMPTION_SET_REF STRING,
+  RUN_STATUS        STRING
+);
+
+CREATE TABLE IF NOT EXISTS RAW.RAW_ALCO_DECISIONS (
+  DECISION_REF      STRING NOT NULL,
+  MEETING_DATE      DATE,
+  COMMITTEE         STRING,
+  TITLE             STRING,
+  DECISION_TEXT     STRING,
+  RATIONALE         STRING,
+  APPROVED_BY       STRING,
+  SOURCE_DOCUMENT   STRING
+);
+
+-- Evidence extracted from source systems that was used to justify each
+-- approved assumption at approval time.
+CREATE TABLE IF NOT EXISTS RAW.RAW_ASSUMPTION_SOURCE_DATA (
+  SOURCE_ID         STRING NOT NULL,
+  ASSUMPTION_REF    STRING,
+  OBSERVATION_DATE  DATE,
+  METRIC_CODE       STRING,
+  METRIC_VALUE      FLOAT,
+  SAMPLE_SIZE       NUMBER(12,0),
+  SOURCE_SYSTEM     STRING,
+  SOURCE_DOCUMENT   STRING
+);
+
+SELECT 'RAW tables ready' AS STATUS;

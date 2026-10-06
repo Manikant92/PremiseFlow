@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc_tmp
+.venv/
+venv/
+
+# Secrets and local config - never commit
+.env
+.env.*
+*.pem
+*.p8
+*.key
+connections.toml
+config.toml
+**/secrets*
+
+# Cortex Code local state (skills ARE committed)
+.snowflake/*
+!.snowflake/cortex/
+.snowflake/cortex/*
+!.snowflake/cortex/skills/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Scratch
+*.log
+premiseflow/sql/_*.sql
